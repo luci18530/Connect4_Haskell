@@ -1,43 +1,75 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Eta reduce" #-}
+{-# HLINT ignore "Avoid lambda" #-}
 
 module Verificar where
 import Data.List (transpose)
 import Data.Char (isDigit)
 
--- Função para verificar se existe uma linha de 4 caracteres diferentes de '0' na horizontal
+-- Função para verificar se existe uma linha de 4 caracteres iguais e não-zero na horizontal
 verificaHorizontal :: [[Char]] -> Bool
-verificaHorizontal matriz =
-    any (\linha -> any (\sublista -> sublista == "yyyy" || sublista == "rrrr") (separarEmSublistas linha)) matriz
+verificaHorizontal matriz =  -- Recebe uma matriz de caracteres
+    any (\linha ->  -- Checa se alguma linha na matriz...
+        any (\sublista ->  -- ...contém uma sublista de 4 caracteres iguais a "yyyy" ou "rrrr"
+            sublista == "yyyy" || sublista == "rrrr"
+        ) (separarEmSublistas linha)  -- Divide a linha em sublistas de tamanho 4
+    ) matriz  -- A matriz a ser verificada
 
 -- Função para verificar se existe uma linha de 4 caracteres diferentes de '0' na vertical
+-- Função para verificar se existe uma linha de 4 caracteres iguais na vertical
 verificaVertical :: [[Char]] -> Bool
 verificaVertical matriz =
-    any (\coluna -> any (\sublista -> sublista == "yyyy" || sublista == "rrrr") (separarEmSublistas coluna)) (transpose matriz)
+    any (\coluna ->  -- Checa se alguma coluna, após transpor a matriz...
+        any (\sublista ->  -- ...contém uma sublista de 4 caracteres iguais a "yyyy" ou "rrrr"
+            sublista == "yyyy" || sublista == "rrrr"
+        ) (separarEmSublistas coluna)  -- Divide a coluna em sublistas de tamanho 4
+    ) (transpose matriz)  -- Transpõe a matriz para tratar as linhas como colunas
 
 -- Função para obter todas as diagonais principais da matriz
 diagonaisPrincipais :: [[Char]] -> [[Char]]
-diagonaisPrincipais matriz = [ [ matriz !! (i+k) !! (j+k) | k <- [0..n], i+k < rows, j+k < cols ]
-                              | i <- [0..rows-1], j <- [0..cols-1], i+j <= rows-4 || i+j <= cols-4]
+diagonaisPrincipais matriz = 
+    [ [ matriz !! (i+k) !! (j+k)  -- Coleta as diagonais principais da matriz
+        | k <- [0..n],  -- Itera pelos índices diagonais
+          i+k < rows,  -- Garante que não ultrapasse as linhas da matriz
+          j+k < cols  -- Garante que não ultrapasse as colunas da matriz
+      ] 
+    | i <- [0..rows-1],  -- Itera pelas linhas iniciais
+      j <- [0..cols-1],  -- Itera pelas colunas iniciais
+      i+j <= rows-4 || i+j <= cols-4  -- Apenas se a diagonal tiver pelo menos 4 elementos
+    ]
+
   where
-    rows = length matriz
-    cols = length (head matriz)
-    n = min (rows - 1) (cols - 1)
+    rows = length matriz -- Número de linhas da matriz
+    cols = length (head matriz) -- Número de colunas da matriz
+    n = min (rows - 1) (cols - 1) -- Número de elementos diagonais
 
 -- Função para obter todas as diagonais secundárias da matriz
 diagonaisSecundarias :: [[Char]] -> [[Char]]
-diagonaisSecundarias matriz = [ [ matriz !! (i+k) !! (j-k) | k <- [0..n], i+k < rows, j-k >= 0 ]
-                                | i <- [0..rows-1], j <- [cols-1, cols-2..0], i <= rows-4 || j >= 3]
+diagonaisSecundarias matriz =
+    [ [ matriz !! (i+k) !! (j-k)  -- Coleta as diagonais secundárias da matriz
+        | k <- [0..n],  -- Itera pelos índices diagonais
+          i+k < rows,  -- Garante que não ultrapasse as linhas
+          j-k >= 0  -- Garante que não ultrapasse as colunas
+      ] 
+    | i <- [0..rows-1],  -- Itera pelas linhas iniciais
+      j <- [cols-1, cols-2..0],  -- Itera pelas colunas finais
+      i <= rows-4 || j >= 3  -- Apenas se a diagonal tiver pelo menos 4 elementos
+    ]
   where
-    rows = length matriz
-    cols = length (head matriz)
-    n = min (rows - 1) (cols - 1)
+    rows = length matriz  -- Número de linhas da matriz
+    cols = length (head matriz)  -- Número de colunas da matriz
+    n = min (rows - 1) (cols - 1)  -- Comprimento máximo para iterar nas diagonais
 
-
--- Função para verificar se existe uma linha de 4 caracteres diferentes de '0' na diagonal
+-- Função para verificar se existe uma linha de 4 caracteres iguais na diagonal
 verificaDiagonal :: [[Char]] -> Bool
-verificaDiagonal matriz =
-    any (\diagonal -> any (\sublista -> sublista == "yyyy" || sublista == "rrrr") (separarEmSublistas diagonal)) diagonais
-    where
-        diagonais = diagonaisPrincipais matriz ++ diagonaisSecundarias matriz
+verificaDiagonal matriz = 
+    any (\diagonal ->  -- Checa se alguma diagonal...
+        any (\sublista ->  -- ...contém uma sublista de 4 caracteres iguais a "yyyy" ou "rrrr"
+            sublista == "yyyy" || sublista == "rrrr"
+        ) (separarEmSublistas diagonal)  -- Divide a diagonal em sublistas de tamanho 4
+    ) diagonais  -- Todas as diagonais principais e secundárias
+  where
+    diagonais = diagonaisPrincipais matriz ++ diagonaisSecundarias matriz
 
 -- Função para separar uma lista em sublistas de tamanho 4
 separarEmSublistas :: [Char] -> [[Char]]
@@ -48,7 +80,12 @@ separarEmSublistas lista
 
 -- Função para obter todas as diagonais principais e secundárias que tenham pelo menos 4 elementos
 obterDiagonais :: [[Char]] -> [[Char]]
-obterDiagonais matriz = filter ((>= 4) . length) $ diagonaisPrincipais matriz ++ diagonaisSecundarias matriz
+obterDiagonais matriz = 
+    -- Concatena todas as diagonais principais e secundárias da matriz
+    let todasAsDiagonais = diagonaisPrincipais matriz ++ diagonaisSecundarias matriz
+    in
+    -- Filtra as diagonais para retornar apenas aquelas com pelo menos 4 elementos
+    filter ((>= 4) . length) todasAsDiagonais
 
 -- Função para verificar se existe uma linha de 4 caracteres diferentes de '0' em qualquer direção
 verificaLinhas :: [[Char]] -> Bool
