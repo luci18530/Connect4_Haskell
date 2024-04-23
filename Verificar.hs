@@ -6,25 +6,6 @@ module Verificar where
 import Data.List (transpose)
 import Data.Char (isDigit)
 
--- Função para verificar se existe uma linha de 4 caracteres iguais e não-zero na horizontal
-verificaHorizontal :: [[Char]] -> Bool
-verificaHorizontal matriz =  -- Recebe uma matriz de caracteres
-    any (\linha ->  -- Checa se alguma linha na matriz...
-        any (\sublista ->  -- ...contém uma sublista de 4 caracteres iguais a "yyyy" ou "rrrr"
-            sublista == "yyyy" || sublista == "rrrr"
-        ) (separarEmSublistas linha)  -- Divide a linha em sublistas de tamanho 4
-    ) matriz  -- A matriz a ser verificada
-
--- Função para verificar se existe uma linha de 4 caracteres diferentes de '0' na vertical
--- Função para verificar se existe uma linha de 4 caracteres iguais na vertical
-verificaVertical :: [[Char]] -> Bool
-verificaVertical matriz =
-    any (\coluna ->  -- Checa se alguma coluna, após transpor a matriz...
-        any (\sublista ->  -- ...contém uma sublista de 4 caracteres iguais a "yyyy" ou "rrrr"
-            sublista == "yyyy" || sublista == "rrrr"
-        ) (separarEmSublistas coluna)  -- Divide a coluna em sublistas de tamanho 4
-    ) (transpose matriz)  -- Transpõe a matriz para tratar as linhas como colunas
-
 -- Função para obter todas as diagonais principais da matriz
 diagonaisPrincipais :: [[Char]] -> [[Char]]
 diagonaisPrincipais matriz = 
@@ -59,17 +40,6 @@ diagonaisSecundarias matriz =
     rows = length matriz  -- Número de linhas da matriz
     cols = length (head matriz)  -- Número de colunas da matriz
     n = min (rows - 1) (cols - 1)  -- Comprimento máximo para iterar nas diagonais
-
--- Função para verificar se existe uma linha de 4 caracteres iguais na diagonal
-verificaDiagonal :: [[Char]] -> Bool
-verificaDiagonal matriz = 
-    any (\diagonal ->  -- Checa se alguma diagonal...
-        any (\sublista ->  -- ...contém uma sublista de 4 caracteres iguais a "yyyy" ou "rrrr"
-            sublista == "yyyy" || sublista == "rrrr"
-        ) (separarEmSublistas diagonal)  -- Divide a diagonal em sublistas de tamanho 4
-    ) diagonais  -- Todas as diagonais principais e secundárias
-  where
-    diagonais = diagonaisPrincipais matriz ++ diagonaisSecundarias matriz
 
 -- Função para separar uma lista em sublistas de tamanho 4
 separarEmSublistas :: [Char] -> [[Char]]
